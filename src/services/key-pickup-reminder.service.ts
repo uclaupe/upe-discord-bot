@@ -1,4 +1,6 @@
 import {
+  Channel,
+  ChannelType,
   time,
   TimestampStyles,
   userMention,
@@ -10,6 +12,10 @@ import type { ChannelId, UnixSeconds, UserId } from "../types/branded.types";
 import channelsService from "./channels.service";
 
 const MAX_TIMEOUT_MS = 2_147_483_647;
+
+function isGuildTextChannel(channel: Channel): channel is GuildTextBasedChannel {
+  return channel.type === ChannelType.GuildText;
+}
 
 class KeyPickupReminderService {
   private timers = new Map<string, NodeJS.Timeout>();
@@ -65,12 +71,15 @@ class KeyPickupReminderService {
     try {
       const guild = channelsService.getUpe();
       const channel = await guild.channels.fetch(reminder.channelId);
-      if (channel?.isTextBased()) {
+      if (channel === null || !isGuildTextChannel(channel)) {
+        console.error(`[REMINDER] ${docId} has invalid channel ID ${reminder.channelId}`);
+        return; // This error is more specific than the catch, so we return early
+      } else {
         const eventTimestamp = time(
           reminder.eventTime,
           TimestampStyles.ShortDateTime,
         );
-        await (channel as GuildTextBasedChannel).send(
+        await channel.send(
           `${userMention(reminder.userId)}, remember to pick up the key ` +
           `for the event at ${eventTimestamp}!`,
         );

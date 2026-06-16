@@ -48,7 +48,7 @@ class KeyPickupReminderCommand extends SlashCommandHandler {
     .setDescription("Schedule a reminder to pick up the key for an event.")
     .addStringOption(input => input
       .setName("datetime")
-      .setDescription("Event date & time (dd/mm/yyyy hh:mm)")
+      .setDescription("Event date & time (mm/dd/yyyy hh:mm)")
       .setRequired(true)
     )
     .addUserOption(input => input
@@ -71,14 +71,14 @@ class KeyPickupReminderCommand extends SlashCommandHandler {
 
     const eventDateTime = DateTime.fromFormat(
       datetimeStr.trim(),
-      "dd/MM/yyyy HH:mm",
+      "MM/dd/yyyy HH:mm",
       { zone: UCLA_TIMEZONE },
     );
     if (!eventDateTime.isValid) {
       await this.replyError(
         interaction,
         "Invalid datetime format: `" + datetimeStr +
-        "`. Expected `dd/mm/yyyy hh:mm`.",
+        "`. Expected `mm/dd/yyyy hh:mm`.",
       );
       return;
     }
