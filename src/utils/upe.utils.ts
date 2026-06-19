@@ -9,7 +9,6 @@ import {
   ALUMNI_ROLE_ID,
   CORPORATE_ROLE_ID,
   DESIGN_AND_PUBLICITY_ROLE_ID,
-  ENTREPRENEURSHIP_ROLE_ID,
   EVP_ROLE_ID,
   FINANCE_AND_FACILITIES_ROLE_ID,
   INDUCTION_AND_MEMBERSHIP_ROLE_ID,
@@ -32,7 +31,6 @@ export enum Committee {
   Mentorship = "Mentorship",
   Social = "Social",
   Tutoring = "Tutoring",
-  Entrepreneurship = "Entrepreneurship",
   Corporate = "Corporate",
   Alumni = "Alumni",
   President = "President",
@@ -85,8 +83,6 @@ export function committeeRoleToEnum(
       return Committee.Corporate;
     case INDUCTION_AND_MEMBERSHIP_ROLE_ID:
       return Committee.InductionAndMembership;
-    case ENTREPRENEURSHIP_ROLE_ID:
-      return Committee.Entrepreneurship;
     case PRESIDENT_ROLE_ID:
       return Committee.President;
     case IVP_ROLE_ID:
@@ -109,7 +105,6 @@ export const COMMITTEE_ROLE_MAP = new BidirectionalMap([
   [Committee.Web, WEB_ROLE_ID],
   [Committee.Corporate, CORPORATE_ROLE_ID],
   [Committee.InductionAndMembership, INDUCTION_AND_MEMBERSHIP_ROLE_ID],
-  [Committee.Entrepreneurship, ENTREPRENEURSHIP_ROLE_ID],
   [Committee.President, PRESIDENT_ROLE_ID],
   [Committee.InternalVicePresident, IVP_ROLE_ID],
   [Committee.ExternalVicePresident, EVP_ROLE_ID],

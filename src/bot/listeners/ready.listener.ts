@@ -17,6 +17,7 @@ import helpCommand from "../../features/convenience/help.command";
 import donutService from "../../features/donuts/donut.service";
 import reviewSheetsService from "../../features/tutoring/review-sheets.service";
 import channelsService from "../../services/channels.service";
+import keyPickupReminderService from "../../services/key-pickup-reminder.service";
 import type { UnixSeconds, UrlString } from "../../types/branded.types";
 import { SystemDateClient, type IDateClient } from "../../utils/date.utils";
 import { quietHyperlink, timestampPair } from "../../utils/formatting.utils";
@@ -39,6 +40,7 @@ class ReadyListener extends DiscordEventListener<Events.ClientReady> {
     await channelsService.initialize(client);
     await reviewSheetsService.initialize(channelsService.getUpe());
     await donutService.initialize(client);
+    await keyPickupReminderService.initialize();
 
     const startupMessage = await this.makeStartupMessage(now);
     await channelsService.getLogSink()?.send(startupMessage);
