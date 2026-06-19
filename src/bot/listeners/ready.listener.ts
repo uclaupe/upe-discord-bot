@@ -88,7 +88,7 @@ class ReadyListener extends DiscordEventListener<Events.ClientReady> {
     // but tsconfig.json rootDir doesn't allow direct imports from it :/ so
     // unfortunately I shall hard-code this and leave it up to successors to
     // update this.
-    const repoUrl = "https://github.com/vinlin24/upe-discord-bot" as UrlString;
+    const repoUrl = "https://github.com/uclaupe/upe-discord-bot" as UrlString;
     const gitHubCommitUrl = `${repoUrl}/commit/${commitHash}` as UrlString;
     const commitHyperlink = quietHyperlink(
       inlineCode(commitHash),

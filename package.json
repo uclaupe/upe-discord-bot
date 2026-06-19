@@ -17,15 +17,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vinlin24/upe-discord-bot.git"
+    "url": "git+https://github.com/uclaupe/upe-discord-bot.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/vinlin24/upe-discord-bot/issues"
+    "url": "https://github.com/uclaupe/upe-discord-bot/issues"
   },
-  "homepage": "https://github.com/vinlin24/upe-discord-bot",
+  "homepage": "https://github.com/uclaupe/upe-discord-bot",
   "dependencies": {
     "@devraelfreeze/discordjs-pagination": "^2.7.6",
     "@discordjs/rest": "^1.1.0",

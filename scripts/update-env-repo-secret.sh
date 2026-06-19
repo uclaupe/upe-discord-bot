@@ -21,5 +21,5 @@ read -rp 'Proceed ([N]o/[y]es/[v]iew B64)? ' choice
 
 case "$choice" in
     v|V|view) echo "$ENV_FILE_B64" ;;
-    y|Y|yes) echo -n "$ENV_FILE_B64" | gh secret set ENV_FILE_B64 --repo vinlin24/upe-discord-bot ;;
+    y|Y|yes) echo -n "$ENV_FILE_B64" | gh secret set ENV_FILE_B64 --repo uclaupe/upe-discord-bot ;;
 esac
