@@ -15,9 +15,9 @@ import { makeErrorEmbed } from "../../utils/errors.utils";
 
 const MEMBER_LIMIT = 20;
 
-class BatchRoleCommand extends SlashCommandHandler {
+class AssignRolesCommand extends SlashCommandHandler {
   public override readonly definition = new SlashCommandBuilder()
-    .setName("batchrole")
+    .setName("assignroles")
     .setDescription("Assign a role to multiple members at once.")
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
     .addRoleOption(input => input
@@ -56,7 +56,7 @@ class BatchRoleCommand extends SlashCommandHandler {
       return;
     }
 
-    // Discord imposes a 1024-byte limit on embed bodies; see EMBED_FIELD_VALUE_LIMIT.
+    // Discord imposes a 1024-char limit on embed bodies; see EMBED_FIELD_VALUE_LIMIT.
     if (memberIdentifiers.length > MEMBER_LIMIT) {
       await interaction.reply({
         embeds: [makeErrorEmbed(
@@ -138,4 +138,4 @@ class BatchRoleCommand extends SlashCommandHandler {
   }
 }
 
-export default new BatchRoleCommand();
+export default new AssignRolesCommand();
