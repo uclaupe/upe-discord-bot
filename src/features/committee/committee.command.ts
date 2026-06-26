@@ -12,6 +12,7 @@ import {
 import { z } from "zod";
 
 import { SlashCommandHandler } from "../../abc/command.abc";
+import type { RoleId } from "../../types/branded.types";
 import { assertNonEmptyArray } from "../../types/generic.types";
 import {
   EMOJI_ANNOUNCEMENT,
@@ -29,9 +30,9 @@ import {
 } from "../../utils/snowflakes.utils";
 import {
   COMMITTEE_NAMES,
+  COMMITTEE_ROLE_MAP,
   Committee,
   TEAM_TYPE_NAMES,
-  committeeRoleToEnum,
   getCommitteeFromName,
 } from "../../utils/upe.utils";
 
@@ -200,7 +201,7 @@ class CommitteeCommand extends SlashCommandHandler {
   private getCommitteeDataFromRole(
     role: Role,
   ): CommitteeData | undefined {
-    const committee = committeeRoleToEnum(role);
+    const committee = COMMITTEE_ROLE_MAP.getKey(role.id as RoleId);
     if (committee === undefined) {
       return undefined;
     }
