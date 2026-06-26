@@ -1,7 +1,7 @@
-import { type ColorResolvable, type RoleResolvable } from "discord.js";
+import { type ColorResolvable } from "discord.js";
 
 import env from "../env";
-import type { RoleId, UrlString } from "../types/branded.types";
+import type { UrlString } from "../types/branded.types";
 import { getEnumFromName } from "../types/generic.types";
 import { BidirectionalMap } from "./data.utils";
 import {
@@ -52,46 +52,6 @@ export function getCommitteeFromName(
     );
   }
   return committee;
-}
-
-/**
- * @deprecated Use the committee-role bidirectional map instead.
- */
-export function committeeRoleToEnum(
-  role: RoleResolvable,
-): Committee | undefined {
-  const roleId = (typeof role === "string" ? role : role.id) as RoleId;
-
-  switch (roleId) {
-    case FINANCE_AND_FACILITIES_ROLE_ID:
-      return Committee.FinanceAndFacilities;
-    case ADVOCACY_ROLE_ID:
-      return Committee.Advocacy;
-    case ALUMNI_ROLE_ID:
-      return Committee.Alumni;
-    case DESIGN_AND_PUBLICITY_ROLE_ID:
-      return Committee.DesignAndPublicity;
-    case MENTORSHIP_ROLE_ID:
-      return Committee.Mentorship;
-    case TUTORING_ROLE_ID:
-      return Committee.Tutoring;
-    case SOCIAL_ROLE_ID:
-      return Committee.Social;
-    case WEB_ROLE_ID:
-      return Committee.Web;
-    case CORPORATE_ROLE_ID:
-      return Committee.Corporate;
-    case INDUCTION_AND_MEMBERSHIP_ROLE_ID:
-      return Committee.InductionAndMembership;
-    case PRESIDENT_ROLE_ID:
-      return Committee.President;
-    case IVP_ROLE_ID:
-      return Committee.InternalVicePresident;
-    case EVP_ROLE_ID:
-      return Committee.ExternalVicePresident;
-    default:
-      return undefined;
-  }
 }
 
 export const COMMITTEE_ROLE_MAP = new BidirectionalMap([
