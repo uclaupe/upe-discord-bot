@@ -27,7 +27,7 @@ class ForEachCommand extends SlashCommandHandler {
   public override readonly definition = new SlashCommandBuilder()
     .setName("foreach")
     .setDescription("Assign or remove a role for a set of members.")
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(input => input
       .setName("source")
       .setDescription(
