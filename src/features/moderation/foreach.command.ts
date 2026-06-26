@@ -67,7 +67,7 @@ class ForEachCommand extends SlashCommandHandler {
       await interaction.reply({
         embeds: [makeErrorEmbed(
           "Could not parse source. Provide user mentions, role mentions, " +
-          "`@everyone`, or raw user IDs separated by spaces.",
+          inlineCode("@everyone") + ", or raw user IDs separated by spaces.",
         )],
         ephemeral: true,
       });
