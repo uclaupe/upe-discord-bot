@@ -12,6 +12,8 @@ import {
 
 import { SlashCommandHandler } from "../../abc/command.abc";
 import type { UserId } from "../../types/branded.types";
+import { SlashCommandCheck } from "src/abc/check.abc";
+import { BotPermissionCheck } from "src/middleware/bot-permission.middleware";
 
 enum Action {
   Assign = "assign",
