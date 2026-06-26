@@ -3,10 +3,10 @@ import {
   EmbedBuilder,
   PermissionFlagsBits,
   SlashCommandBuilder,
+  inlineCode,
   roleMention,
   type ChatInputCommandInteraction,
   type Guild,
-  type GuildMember,
   type Role,
 } from "discord.js";
 
