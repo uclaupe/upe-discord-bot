@@ -52,7 +52,9 @@ class ForEachCommand extends SlashCommandHandler {
     )
     .toJSON();
 
-  public override readonly checks = [];
+  public override readonly checks: SlashCommandCheck[] = [
+    new BotPermissionCheck(this).needsToHave(PermissionFlagsBits.ManageRoles),
+  ];
 
   public override async execute(
     interaction: ChatInputCommandInteraction,
