@@ -12,7 +12,6 @@ import {
 
 import { SlashCommandHandler } from "../../abc/command.abc";
 import type { UserId } from "../../types/branded.types";
-import { makeErrorEmbed } from "../../utils/errors.utils";
 
 enum Action {
   Assign = "assign",
@@ -66,21 +65,17 @@ class ForEachCommand extends SlashCommandHandler {
 
     const userIds = await this.resolveUserIds(source, guild);
     if (userIds === null) {
-      await interaction.reply({
-        embeds: [makeErrorEmbed(
-          "Could not parse source. Provide user mentions, role mentions, " +
-          inlineCode("@everyone") + ", or raw user IDs separated by spaces.",
-        )],
-        ephemeral: true,
-      });
+      await this.replyError(interaction,
+        "Could not parse source. Provide user mentions, role mentions, " +
+        inlineCode("@everyone") + ", or raw user IDs separated by spaces.",
+      );
       return;
     }
 
     if (userIds.size === 0) {
-      await interaction.reply({
-        embeds: [makeErrorEmbed("No members matched the provided source.")],
-        ephemeral: true,
-      });
+      await this.replyError(interaction,
+        "No members matched the provided source.",
+      );
       return;
     }
 
