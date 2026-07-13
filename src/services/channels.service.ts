@@ -24,6 +24,7 @@ import {
   DEVELOPER_ROLE_ID,
   UPE_GUILD_ID,
 } from "../utils/snowflakes.utils";
+import type { ChannelId } from "../types/branded.types";
 
 class ChannelService {
   private client: Client<true> | null = null;
@@ -63,6 +64,31 @@ class ChannelService {
       return null;
     }
     return this.logsChannel;
+  }
+
+  public async sendToChannel(
+    channelId: ChannelId,
+    options: string | MessagePayload | MessageCreateOptions,
+  ): Promise<Message | null> {
+    const upe = this.getUpe();
+    const channel = await upe.channels.fetch(channelId);
+    if (channel === null) {
+      console.error(`tried to send to unknown channel (ID: ${channelId}`);
+      return null;
+    }
+    if (!channel.isTextBased()) {
+      console.error(`tried to send to non-text channel (ID: ${channelId})`);
+      return null;
+    }
+    try {
+      return await channel.send(options);
+    }
+    catch (error) {
+      console.error(
+        `failed to send to channel (ID: ${channelId}), doing nothing`,
+      );
+      return null;
+    }
   }
 
   public async sendDev(
