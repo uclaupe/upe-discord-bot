@@ -79,7 +79,7 @@ class SpamListener extends DiscordEventListener<Events.MessageCreate> {
 
   private isProhibitedAtEveryoneAttempt(message: Message<true>): boolean {
     // Message doesn't even mention @everyone, not applicable.
-    if (!message.mentions.everyone) {
+    if (!this.hasEveryonePing(message.content)) {
       return false;
     }
 
@@ -109,6 +109,33 @@ class SpamListener extends DiscordEventListener<Events.MessageCreate> {
     }
 
     return true;
+  }
+
+  /**
+   * Return whether the `content` contains a raw `@everyone` substring, not
+   * wrapped by code markup (which would disable the ping even if the author had
+   * ping permissions).
+   *
+   * Courtesy of Claude Code.
+   */
+  private hasEveryonePing(content: string): boolean {
+    let stripped = content;
+
+    // Remove fenced code blocks (```...```), which are allowed to span multiple
+    // lines.
+    stripped = stripped.replace(/```[\s\S]*?```/g, '');
+
+    // Remove double-backtick inline code spans (``...``), used so the span's
+    // content can itself contain a literal backtick. Restricted to a single
+    // line, since Discord doesn't let inline code cross lines.
+    stripped = stripped.replace(/``[^\n]*?``/g, '');
+
+    // Remove single-backtick inline code spans (`...`), also single-line only,
+    // and not allowed to contain a backtick itself (that's what the
+    // double-backtick form above is for).
+    stripped = stripped.replace(/`[^`\n]*?`/g, '');
+
+    return stripped.includes("@everyone");
   }
 }
 
