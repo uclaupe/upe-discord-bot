@@ -26,6 +26,7 @@ export const EVP_ROLE_ID = "778819652775706645" as RoleId;
 
 // Title role IDs.
 
+export const ADVISOR_ROLE_ID = "976178843855503372" as RoleId;
 export const ALUM_ROLE_ID = "828720200676409344" as RoleId;
 export const EMERITUS_ROLE_ID = "854916094326341633" as RoleId;
 export const ADMINS_ROLE_ID = "778437029280612353" as RoleId;
