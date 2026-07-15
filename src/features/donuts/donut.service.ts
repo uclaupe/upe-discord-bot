@@ -4,97 +4,23 @@ import {
   EmbedBuilder,
   ThreadAutoArchiveDuration,
   userMention,
-  type Client,
 } from "discord.js";
 import { DateTime } from "luxon";
+import type { Model } from "mongoose";
 
+import { WeeklyScheduledService } from "../../abc/weekly-scheduler.abc";
 import { DonutStateModel, type DonutState } from "../../models/donut.model";
 import channelsService from "../../services/channels.service";
-import type { GuildId, Milliseconds, UserId } from "../../types/branded.types";
-import {
-  SystemDateClient,
-  UCLA_TIMEZONE,
-  type IDateClient,
-} from "../../utils/date.utils";
+import type { GuildId, UserId } from "../../types/branded.types";
+import { SystemDateClient, UCLA_TIMEZONE } from "../../utils/date.utils";
 import { DONUT_CHANNEL_ID, UPE_GUILD_ID } from "../../utils/snowflakes.utils";
-import {
-  matchesSchedule,
-  nextScheduledOccurrence,
-} from "../../utils/weekly-schedule.utils";
 
-const POLL_INTERVAL_MSEC = (60 * 1000) as Milliseconds;
+export class DonutService extends WeeklyScheduledService<DonutState> {
+  protected override readonly model: Model<DonutState> = DonutStateModel;
+  protected override readonly logPrefix = "[DONUT]";
 
-export class DonutService {
-  private bot: Client | null = null;
-
-  public constructor(private readonly dates: IDateClient) {}
-
-  /**
-   * Startup hook: attach the client and begin the rolling poll loop that
-   * triggers scheduled donut chats.
-   */
-  public async initialize(client: Client): Promise<void> {
-    this.bot = client;
-    await this.alignNextChatWithSchedule();
-    // Catch up on anything overdue from downtime before scheduling.
-    await this.pollOnce();
-    this.schedulePoll();
-    console.log(
-      `[DONUT] scheduler started, polling every ${POLL_INTERVAL_MSEC}ms`,
-    );
-  }
-
-  public async getOrCreate(
-    guildId: GuildId = UPE_GUILD_ID,
-  ): Promise<DonutState> {
-    const existing = await DonutStateModel.findOne({ guildId });
-    if (existing !== null) {
-      return existing;
-    }
-    return await DonutStateModel.create({ guildId });
-  }
-
-  private async setNextChat(
-    nextChatIsoTime: string,
-    guildId: GuildId = UPE_GUILD_ID,
-  ): Promise<void> {
-    await DonutStateModel.updateOne(
-      { guildId },
-      { $set: { nextChatIsoTime } },
-    );
-  }
-
-  /**
-   * Reconcile the persisted `nextChatIsoTime` with the hardcoded weekly
-   * schedule. Recomputes when missing or when the persisted day/hour/minute
-   * no longer matches, so cadence changes take effect on next boot.
-   */
-  private async alignNextChatWithSchedule(
-    guildId: GuildId = UPE_GUILD_ID,
-  ): Promise<void> {
-    const state = await this.getOrCreate(guildId);
-    const persisted =
-      state.nextChatIsoTime === null
-        ? null
-        : DateTime.fromISO(state.nextChatIsoTime, { zone: UCLA_TIMEZONE });
-
-    if (persisted !== null && matchesSchedule(persisted)) {
-      return;
-    }
-
-    const now = this.dates.getDateTime(this.dates.getNow(), UCLA_TIMEZONE);
-    const next = nextScheduledOccurrence(now);
-    const iso = next.toISO();
-    if (iso !== null) {
-      await this.setNextChat(iso, guildId);
-    }
-  }
-
-  public async setPaused(
-    paused: boolean,
-    guildId: GuildId = UPE_GUILD_ID,
-  ): Promise<void> {
-    await DonutStateModel.updateOne({ guildId }, { $set: { paused } });
+  protected override async runScheduledEvent(state: DonutState): Promise<void> {
+    await this.startDonutChat(state);
   }
 
   public async addUser(
@@ -219,83 +145,6 @@ export class DonutService {
       { guildId: state.guildId },
       { $set: { history: newHistory } },
     );
-  }
-
-  private schedulePoll(): void {
-    setTimeout(async () => {
-      try {
-        await this.pollOnce();
-      } catch (error) {
-        console.error("[DONUT] poll failed:", error);
-        if (error instanceof Error) {
-          await channelsService.sendDevError(error);
-        }
-      }
-      this.schedulePoll();
-    }, POLL_INTERVAL_MSEC);
-  }
-
-  private async pollOnce(): Promise<void> {
-    if (this.bot === null) {
-      return;
-    }
-    await this.runDueChats();
-  }
-
-  private async runDueChats(): Promise<void> {
-    const now = this.dates.getDateTime(this.dates.getNow(), UCLA_TIMEZONE);
-    const candidates = await DonutStateModel.find({
-      paused: false,
-      nextChatIsoTime: { $ne: null },
-    });
-    for (const state of candidates) {
-      if (state.nextChatIsoTime === null) {
-        continue;
-      }
-      const scheduled = DateTime.fromISO(state.nextChatIsoTime, {
-        zone: UCLA_TIMEZONE,
-      });
-      if (!scheduled.isValid || scheduled > now) {
-        continue;
-      }
-      try {
-        await this.startDonutChat(state);
-      } catch (error) {
-        console.error("[DONUT] failed to run scheduled chat:", error);
-        if (error instanceof Error) {
-          await channelsService.sendDevError(error);
-        }
-      }
-    }
-  }
-
-  private getBot(): Client {
-    if (this.bot === null) {
-      throw new Error("donut service used before initialize()");
-    }
-    return this.bot;
-  }
-
-  private async advanceSchedule(state: DonutState): Promise<void> {
-    if (state.nextChatIsoTime === null) {
-      return;
-    }
-    const scheduled = DateTime.fromISO(state.nextChatIsoTime, {
-      zone: UCLA_TIMEZONE,
-    });
-    const now = this.dates.getDateTime(this.dates.getNow(), UCLA_TIMEZONE);
-    // Don't advance if the scheduled firing hasn't happened yet — this
-    // preserves the regular cadence when /donutforce is invoked early.
-    if (!scheduled.isValid || scheduled >= now) {
-      return;
-    }
-    // Step past today's firing before snapping to the env schedule, so a
-    // chat that just fired doesn't immediately re-qualify as overdue.
-    const next = nextScheduledOccurrence(now.plus({ days: 1 }));
-    const iso = next.toISO();
-    if (iso !== null) {
-      await this.setNextChat(iso, state.guildId);
-    }
   }
 
   private static createHeuristicGrouping(
