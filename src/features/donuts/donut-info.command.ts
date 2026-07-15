@@ -5,13 +5,10 @@ import {
   SlashCommandBuilder,
   type ChatInputCommandInteraction,
 } from "discord.js";
-import { DateTime } from "luxon";
-
 import { SlashCommandHandler } from "../../abc/command.abc";
-import type { UnixSeconds } from "../../types/branded.types";
 import { UCLA_TIMEZONE } from "../../utils/date.utils";
-import { timestampPair } from "../../utils/formatting.utils";
 import { DONUT_CHANNEL_ID } from "../../utils/snowflakes.utils";
+import { describeNextOccurrence } from "../../utils/weekly-schedule.utils";
 import donutService from "./donut.service";
 
 class DonutInfoCommand extends SlashCommandHandler {
@@ -24,19 +21,7 @@ class DonutInfoCommand extends SlashCommandHandler {
     interaction: ChatInputCommandInteraction,
   ): Promise<void> {
     const state = await donutService.getOrCreate();
-
-    let nextChatValue: string;
-    if (state.nextChatIsoTime === null) {
-      nextChatValue = "Pending — schedule will sync on next bot startup.";
-    } else {
-      const scheduled = DateTime.fromISO(state.nextChatIsoTime, {
-        zone: UCLA_TIMEZONE,
-      });
-      const unixSeconds = scheduled.toUnixInteger() as UnixSeconds;
-      const [nextChatMention, nextChatRelativeMention] =
-        timestampPair(unixSeconds);
-      nextChatValue = `${nextChatMention} (${nextChatRelativeMention})`;
-    }
+    const nextChatValue = describeNextOccurrence(state.nextChatIsoTime);
 
     const embed = new EmbedBuilder()
       .setTitle(`Donut chat config for ${interaction.guild?.name}`)
