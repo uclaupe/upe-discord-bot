@@ -17,14 +17,12 @@ import {
   type IDateClient,
 } from "../../utils/date.utils";
 import { DONUT_CHANNEL_ID, UPE_GUILD_ID } from "../../utils/snowflakes.utils";
+import {
+  matchesSchedule,
+  nextScheduledOccurrence,
+} from "../../utils/weekly-schedule.utils";
 
 const POLL_INTERVAL_MSEC = (60 * 1000) as Milliseconds;
-
-// Weekly cadence anchor in UCLA local time: Monday at 9:00 AM. Luxon
-// weekdays are 1=Monday through 7=Sunday.
-const SCHEDULE_WEEKDAY = 1;
-const SCHEDULE_HOUR = 9;
-const SCHEDULE_MINUTE = 0;
 
 export class DonutService {
   private bot: Client | null = null;
@@ -80,36 +78,16 @@ export class DonutService {
         ? null
         : DateTime.fromISO(state.nextChatIsoTime, { zone: UCLA_TIMEZONE });
 
-    const matchesSchedule =
-      persisted !== null &&
-      persisted.isValid &&
-      persisted.weekday === SCHEDULE_WEEKDAY &&
-      persisted.hour === SCHEDULE_HOUR &&
-      persisted.minute === SCHEDULE_MINUTE;
-
-    if (matchesSchedule) {
+    if (persisted !== null && matchesSchedule(persisted)) {
       return;
     }
 
     const now = this.dates.getDateTime(this.dates.getNow(), UCLA_TIMEZONE);
-    const next = DonutService.nextScheduledOccurrence(now);
+    const next = nextScheduledOccurrence(now);
     const iso = next.toISO();
     if (iso !== null) {
       await this.setNextChat(iso, guildId);
     }
-  }
-
-  private static nextScheduledOccurrence(after: DateTime): DateTime {
-    let candidate = after.set({
-      hour: SCHEDULE_HOUR,
-      minute: SCHEDULE_MINUTE,
-      second: 0,
-      millisecond: 0,
-    });
-    while (candidate < after || candidate.weekday !== SCHEDULE_WEEKDAY) {
-      candidate = candidate.plus({ days: 1 });
-    }
-    return candidate;
   }
 
   public async setPaused(
@@ -313,7 +291,7 @@ export class DonutService {
     }
     // Step past today's firing before snapping to the env schedule, so a
     // chat that just fired doesn't immediately re-qualify as overdue.
-    const next = DonutService.nextScheduledOccurrence(now.plus({ days: 1 }));
+    const next = nextScheduledOccurrence(now.plus({ days: 1 }));
     const iso = next.toISO();
     if (iso !== null) {
       await this.setNextChat(iso, state.guildId);
