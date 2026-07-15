@@ -11,12 +11,7 @@ import {
 } from "discord.js";
 
 import { DiscordEventListener } from "../../abc/listener.abc";
-import {
-  ADVISOR_ROLE_ID,
-  EMERITUS_ROLE_ID,
-  MODERATION_CHANNEL_ID,
-  OFFICERS_ROLE_ID,
-} from "../../utils/snowflakes.utils";
+import { MODERATION_CHANNEL_ID } from "../../utils/snowflakes.utils";
 import channelsService from "../../services/channels.service";
 
 class SpamListener extends DiscordEventListener<Events.MessageCreate> {
@@ -95,16 +90,13 @@ class SpamListener extends DiscordEventListener<Events.MessageCreate> {
       return false;
     }
 
-    // (Fail-safe) Author is an officer/emeritus/advisor, which shouldn't be
-    // caught and punished by this filter ever. This ideally should be covered
-    // by proper permissions setup (above check), but there could be niche edge
-    // cases where maybe a channel has an overwrite to suppress
-    // @everyone-pinging even for them.
-    if (author.roles.cache.hasAny(
-      OFFICERS_ROLE_ID,
-      EMERITUS_ROLE_ID,
-      ADVISOR_ROLE_ID,
-    )) {
+    // (Fail-safe) Author has any role, meaning they're likely not someone who
+    // joined the server just to send spam messages. This isn't a perfect
+    // heuristic but this final check should seldom be hit anyway. It's just
+    // here for the niche edge cases where maybe a channel has a permission
+    // overwrite to suppress @everyone-pinging even for legitimate users, thus
+    // bypassing the check above.
+    if (author.roles.cache.size > 0) {
       return false;
     }
 
