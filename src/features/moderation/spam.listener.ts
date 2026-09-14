@@ -6,7 +6,6 @@ import {
   Events,
   inlineCode,
   Message,
-  PermissionFlagsBits,
   userMention,
 } from "discord.js";
 
@@ -84,19 +83,23 @@ class SpamListener extends DiscordEventListener<Events.MessageCreate> {
       return false;
     }
 
-    // Author is authorized to mention @everyone in this channel, allowed.
-    const permissions = message.channel.permissionsFor(author);
-    if (permissions.has(PermissionFlagsBits.MentionEveryone)) {
+    // If Discord actually honored the @everyone mention, the author was allowed
+    // to ping everyone here — not spam.
+    if (message.mentions.everyone) {
       return false;
     }
 
-    // (Fail-safe) Author has any role, meaning they're likely not someone who
-    // joined the server just to send spam messages. This isn't a perfect
-    // heuristic but this final check should seldom be hit anyway. It's just
-    // here for the niche edge cases where maybe a channel has a permission
-    // overwrite to suppress @everyone-pinging even for legitimate users, thus
-    // bypassing the check above.
-    if (author.roles.cache.size > 0) {
+    // (Fail-safe) Author has any assignable role, meaning they're likely not
+    // someone who joined the server just to send spam messages. discord.js
+    // always includes the @everyone role in `roles.cache`, so ignore it.
+    // This isn't a perfect heuristic but this final check should seldom be hit
+    // anyway. It's just here for the niche edge cases where maybe a channel has
+    // a permission overwrite to suppress @everyone-pinging even for legitimate
+    // users.
+    const assignableRoles = author.roles.cache.filter(
+      role => role.id !== author.guild.id,
+    );
+    if (assignableRoles.size > 0) {
       return false;
     }
 
