@@ -15,6 +15,7 @@ import {
 import { DiscordEventListener } from "../../abc/listener.abc";
 import helpCommand from "../../features/convenience/help.command";
 import donutService from "../../features/donuts/donut.service";
+import mockInterviewService from "../../features/mock-interview/mock-interview.service";
 import reviewSheetsService from "../../features/tutoring/review-sheets.service";
 import channelsService from "../../services/channels.service";
 import keyPickupReminderService from "../../services/key-pickup-reminder.service";
@@ -40,6 +41,7 @@ class ReadyListener extends DiscordEventListener<Events.ClientReady> {
     await channelsService.initialize(client);
     await reviewSheetsService.initialize(channelsService.getUpe());
     await donutService.initialize(client);
+    await mockInterviewService.initialize(client);
     await keyPickupReminderService.initialize();
 
     const startupMessage = await this.makeStartupMessage(now);
