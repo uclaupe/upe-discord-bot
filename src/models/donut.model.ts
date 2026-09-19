@@ -1,13 +1,11 @@
 import mongoose from "mongoose";
 
-import type { GuildId, UserId } from "../types/branded.types";
+import type { WeeklyScheduleState } from "../abc/weekly-scheduler.abc";
+import type { UserId } from "../types/branded.types";
 
-export type DonutState = {
-  guildId: GuildId;
+export type DonutState = WeeklyScheduleState & {
   users: UserId[];
-  nextChatIsoTime: string | null;
   history: UserId[][][];
-  paused: boolean;
 };
 
 const donutStateSchema = new mongoose.Schema<DonutState>({
