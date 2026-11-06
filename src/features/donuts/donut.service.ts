@@ -307,8 +307,12 @@ export class DonutService {
     });
     const now = this.dates.getDateTime(this.dates.getNow(), UCLA_TIMEZONE);
     // Don't advance if the scheduled firing hasn't happened yet — this
-    // preserves the regular cadence when /donutforce is invoked early.
-    if (!scheduled.isValid || scheduled >= now) {
+    // preserves the regular cadence when /donutforce is invoked early. This
+    // must be a strict comparison to mirror `runDueChats`, which treats
+    // `scheduled === now` as due: otherwise a poll landing exactly on the
+    // scheduled second runs the chat without advancing, and the next poll
+    // runs it a second time.
+    if (!scheduled.isValid || scheduled > now) {
       return;
     }
     // Step past today's firing before snapping to the env schedule, so a
